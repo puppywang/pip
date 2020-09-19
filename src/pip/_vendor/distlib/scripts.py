@@ -370,11 +370,23 @@ class ScriptMaker(object):
         # Executable launcher support.
         # Launchers are from https://bitbucket.org/vinay.sajip/simple_launcher/
 
-        def _get_launcher(self, kind):
+        def _get_platform_bit(self):
             if struct.calcsize('P') == 8:   # 64-bit
                 bits = '64'
             else:
                 bits = '32'
+            # sniff sys.version for architecture.
+            prefix = " bit ("
+            i = sys.version.find(prefix)
+            if i != -1:
+                j = sys.version.find(")", i)
+                look = sys.version[i+len(prefix):j].lower()
+                if look == 'arm64':
+                    bits = 'a64'
+            return bits
+
+        def _get_launcher(self, kind):
+            bits = self._get_platform_bit()
             name = '%s%s.exe' % (kind, bits)
             # Issue 31: don't hardcode an absolute package name, but
             # determine it relative to the current package
